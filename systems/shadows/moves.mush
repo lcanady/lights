@@ -9,22 +9,33 @@
 
 &cmd.moves/categories #us =$+moves/categories *:
   @include %!/wiz_check=%#;
-  &categories #us = %0;
-  @pemit %#=[v(prompt)] Categories [itemize( %0,,| )] added.
+  &categories #usmd = %0;
+  @pemit %#=[v(prompt)] Categories: [itemize(%0, |)] added.
 
 /*
 =============================================================================
-=== Command: +moves/add <category>/<move>=<details> =========================
+=== Command: +moves/add <title>|<faction>|<category>=<details> ==============
 
   Add/Edit a new move to the move database.
 
   registers:
-    %0: Category
-    %1: Title
-    %2: Move Details
+    %0: Title
+    %1: Faction
+    %2: Category
+    %3: Details
 
 =============================================================================
 */
 
-&cmd.moves/add #us = $+moves/add */*=*:
+&cmd.moves/add #us = $+moves/add *|*|*=*:
   @include %!/wiz_check = %#;
+  
+  // Does the category exist?
+  @assert match(get(#usmd/categories),%2, |) = {
+    @pemit %#=[v(prompt-error)] That's not a valid category.
+  };
+
+  &move-[edit(%0,%b,~)] #usmd= %1|%2|%3;
+  @pemit %#= [v(prompt)] Move: %ch[capstr(%0)]%cn
+    %(%ch%cx[lcstr(%2)]%cn%) added to faction: %ch[capstr(%1)]%cn.%r
+    [v(prompt)] Use '%ch+moves/view [lcstr(%0)]' to preview.

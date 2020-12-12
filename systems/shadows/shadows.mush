@@ -9,6 +9,8 @@
 =============================================================================
 */
 
+#include ./includes.mush
+
 @create Urban Shadows Rules Engine <US>
 @tag/add us=lastcreate(me, t)
 @set #us = safe inherit no_modify
