@@ -1,0 +1,30 @@
+/*
+=============================================================================
+=== Command: +moves/categories <category>[|<categoryN>] =====================
+
+  Set the different categories that moves can fall under.
+
+=============================================================================
+*/
+
+&cmd.moves/categories #us =$+moves/categories *:
+  @include %!/wiz_check=%#;
+  &categories #us = %0;
+  @pemit %#=[v(prompt)] Categories [itemize( %0,,| )] added.
+
+/*
+=============================================================================
+=== Command: +moves/add <category>/<move>=<details> =========================
+
+  Add/Edit a new move to the move database.
+
+  registers:
+    %0: Category
+    %1: Title
+    %2: Move Details
+
+=============================================================================
+*/
+
+&cmd.moves/add #us = $+moves/add */*=*:
+  @include %!/wiz_check = %#;

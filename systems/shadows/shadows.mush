@@ -1,0 +1,57 @@
+/*
+=============================================================================
+=== Urban Shadows Roleplaying Engine ========================================
+
+  This is the main file for the Urban Shadows MUSH roleplaying engine.
+  This is the main file thoat should be qouted into the game to create 
+  the rulesystem.
+
+=============================================================================
+*/
+
+@create Urban Shadows Rules Engine <US>
+@tag/add us=lastcreate(me, t)
+@set #us = safe inherit no_modify
+
+@create Urban Shadows Move Database <USMD>
+@tag/add usmd = lastcreate(me, t)
+@set #usmd=safe no_modify
+@tel #usmd=#us
+
+@create Urban Shadows Archtype Database <USAD>
+@tag/add usad = lastcreate(me,t)
+@set #usad = safe no_modify
+@tel #usad=#us
+
+&stats #us = blood|heart|mind|spirit|mortality|night|power|wild
+&tags #us = 
+  anchored|
+  ap|
+  area|
+  autofire|
+  close|
+  close/far|
+  concealable|
+  far|
+  fire|
+  hand|
+  hand/close|
+  intimiate|
+  intimate/hand|
+  loud|
+  messy|
+  reload|
+  s-harm|
+  silver|
+  cold iron|
+  holy|
+  valuable|
+  1-harm|
+  2-harm|
+  3-harm|
+  1-armor|
+  2-armor
+
+#include ./moves.mush
+#include ./archtypes.mush
+#include ./chargen.mush

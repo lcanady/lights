@@ -1,0 +1,22 @@
+/*
+#############################################################################
+### City Of Lights Setup File ###############################################
+
+  This is the installer file for City of Lights.  It's meant to be a one
+  stop installer, but the individual pieces can also be used to make
+  different elements of a game.
+
+#############################################################################
+*/
+
+#include ./utils.mush
+
+// Inclde the parents
+// TODO:  Make the formatter read an index.mush from a parent
+// directory for faster reference.
+
+#include ./parents/room.mush
+#include ./parents/player.mush
+#include ./parents/exit.mush
+
+#include ./systems/shadows/shadows.mush
