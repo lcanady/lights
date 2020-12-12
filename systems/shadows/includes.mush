@@ -1,10 +1,10 @@
 
 
-&wiz_check = 
+&wiz_check #us = 
   @assert gte(bittype(%0), 6) = {
     @pemit %#=Permission denied.
   }
 
-&prompt #sc = %ch%cg-%cn
-&prompt-warn #sc = %ch%cy-%cn
-&prompt-error #sc = %ch%cr-%cn
+&prompt #us = %ch%cg-%cn
+&prompt-warn #us = %ch%cy-%cn
+&prompt-error #us = %ch%cr-%cn
