@@ -1,0 +1,8 @@
+@if not(isdbref(tag(tp))) = {
+    @create Global: Thing Parent <TP>;
+    @tag/add tp = lastcreate(me, t);
+    @set #tp = safe no_modify;
+  }
+
+&placement #tp = %ch%cx%,%bsits here.%cn
+

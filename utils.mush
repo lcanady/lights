@@ -1,0 +1,21 @@
+@if not(isdbref(tag(gfo))) = {
+    @create Global Function Object <GFO>;
+    @tag/add gfo = lastcreate(me, t);
+    @set #gfo = safe inherit no_modify sidefx;
+  }
+
+
+&header #gfo= 
+  [printf(
+      $26:%cb=%ch-%cn:^s$25:%cb=%ch-%cn:^s$26:%cb=%ch-%cn:^s, 
+      u(#gfo/frame, %0), u(#gfo/frame, %1), u(#gfo/frame, %2)
+  )]
+
+&frame #gfo= if(strlen(%0), %cy<%ch<%cn %0 %ch%cy>%cn%cy>%cn)
+
+&fn.marker #gfo= 
+  switch(1, 
+    gte(bittype(%0),6), %ch%cy*%cn,
+    gte(bittype(%0),3), %ch%cb@%cn,
+    gte(bittype(%0),2), %ch%cg+%cn,
+  )
