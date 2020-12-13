@@ -36,34 +36,38 @@
 &formatdesc #rp =%r%0%r
 
 @conformat #rp =
-  [u(#gfo/header, Characters)]%r
-  [space(3)]
-  %ch[ljust(Name, 25)]
-  [rjust(Idle, 5)]%b%b
-  Title%cn%r
-  [repeat(%ch%cb-%cn,77)]
-  [iter(
-      %# [lcon(%!/connected)],
-      %r[u(%!/fn.player, ##)]
-  )]%r
-  [u(#gfo/header, Objects,,Exits)]
-  [iter(
 
-    // Basically I want to get a list of numbers here,
-    // based on the largest number of dbrefs for things
-    // and exits.
+  [if( 
+    or(not(hasflag(%!,dark)),gte(bittype(%#),2)),
+    [u(#gfo/header, Characters)]%r
+    [space(3)]
+    %ch[ljust(Name, 25)]
+    [rjust(Idle, 5)]%b%b
+    Title%cn%r
+    [repeat(%ch%cb-%cn,77)]
+    [iter(
+          [lcon(%!/connect)],
+        %r[u(%!/fn.player, ##)]
+    )]%r
+    [u(#gfo/header, Objects,,Exits)]
+    [iter(
 
-    lnum(
-      max(
-        words(setr(0, lcon(%!/object))),
-        words(setr(1, lexits(%!)))
-      )
-    ),
+      // Basically I want to get a list of numbers here,
+      // based on the largest number of dbrefs for things
+      // and exits.
 
-    // Now we're going to use the current number as our index
-    // to grab values from our lists.
-    %r[ljc(u(%!/fn.things, extract(%q0, add(##, 1), 1)), 50)]
-      [rjc(u(%!/fn.exits, extract(%q1, add(##, 1), 1)), 26)]
+      lnum(
+        max(
+          words(setr(0, lcon(%!/object))),
+          words(setr(1, lexits(%!)))
+        )
+      ),
+
+      // Now we're going to use the current number as our index
+      // to grab values from our lists.
+      %r[ljc(u(%!/fn.things, extract(%q0, add(##, 1), 1)), 50)]
+        [rjc(u(%!/fn.exits, extract(%q1, add(##, 1), 1)), 26)]
+    )]
   )]
 
 @exitformat #rp = [u(#gfo/header)]
