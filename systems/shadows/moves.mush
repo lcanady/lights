@@ -16,7 +16,7 @@
     +achettypes/del <item>[,<item>[,<itemN>]]
 
     +moves/add <title>/<category>=<archetype>
-    +moves/del <title>=<archetype>
+    +moves/del <archetype>=<title>
     
     +moves <category>[:<archetype>]
 ??  +moves <title>
@@ -79,6 +79,21 @@
   };
 
 @set #us/cmd.moves/categories = Reg
+
+
+/*
+=============================================================================
+=== +<categories> or <archetypes> ===========================================
+
+  Get a listing of available categories and archetypes.
+
+=============================================================================
+*/
+&cmd.categories #us= $\+(categories|archetypes):
+   @pemit %#=[v(prompt)] The following [lcstr(%1)] are available: 
+      %ch[itemize(caplist(v(%1), |), |)]%cn. 
+  
+@set #us/cmd.categories = Reg
 
 
 /*
