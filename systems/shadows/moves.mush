@@ -59,10 +59,10 @@
         @pemit %#=[v(prompt)] Archetype%(s%) added: 
           %ch[itemize(caplist(%q0,|), |)]%cn.
       }
-  }
+  };
 
   @if strmatch(lcstr(%2), del) = {
-    
+   
     [setq(0, iter(%3, trim(##),%,,|))];
     // Figure out the type we're removing from.
     @switch/first lcstr(%1) = 
@@ -76,7 +76,7 @@
         @pemit %#=[v(prompt)] Archetype%(s%) removed: 
           %ch[itemize(caplist(%q0,|), |)]%cn.
       }
-  }
+  };
 
 @set #us/cmd.moves/categories = Reg
 
