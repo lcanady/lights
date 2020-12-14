@@ -1,17 +1,68 @@
 /*
-=============================================================================
-=== Command: +moves/categories <category>[|<categoryN>] =====================
+#############################################################################
+### MOVES ###################################################################
+  
+  This file has all of the commands and functions relative to the +moves
+  system for the PbTA Engine.
 
-  Set the different categories that moves can fall under.
+  TODO: See if I need to add a notes section.
+  TODO: Also See about moving move data over to it's own dedicated object.
+  
+  Syntax:
+    +categories/add <item>[,<item>[,<itemN>]]
+    +categories/del <item>[,<item>[,<itemN>]]
+
+    +archetypes/add <item>[,<item>[,<itemN>]]
+    +achettypes/del <item>[,<item>[,<itemN>]]
+
+    +moves/add <title>/<category>=<archetype>
+    +moves/del <title>=<archetype>
+    
+    +moves <category>[:<archetype>]
+??  +moves <title>
+
+#############################################################################
+*/
+
+
+/*
+=============================================================================
+=== Command: +<categories>|<archetypes>/add <item>[,<itemN>] ================
+
+  Add a list of archetypes or categories to the PBtA Rules Engine.
+  
+  registers:
+    %0: The entire regex match
+    %1: The type of add (archetype or category)
+    %2: Operation (add or del)
+    %3: The list
 
 =============================================================================
 */
 
-&cmd.moves/categories #us =$+moves/categories *:
+&cmd.moves/categories #us =$\+(archetypes|categories)\/(add|del)\s*?(.*):
   @include %!/wiz_check=%#;
-  &categories #us = setunion(v(categories), lcstr(%0), |, |);
-  @pemit %#=[v(prompt)] Categorie%(s%) added:
-    %ch[itemize(caplist(%0), |)]%cn.
+
+  // If this is an add request, process it.
+  @if strmatch(lcstr(%2), add) = {
+    
+    [setq(0, iter(%3, trim(##),%,,|))];
+    // Figure out the type we're adding too.
+    @switch/first lcstr(%1) = 
+      cat*, { 
+        &categories #us = setunion(v(categories), lcstr(%q0), |, |);
+        @pemit %#=[v(prompt)] Categorie%(s%) added: 
+          %ch[itemize(caplist(%q0, |), |)]%cn.
+      },
+      arc*, {
+        &archetypes #us = setunion(v(archetypes), lcstr(%q0), |, |);
+        @pemit %#=[v(prompt)] Archetype%(s%) added: 
+          %ch[itemize(caplist(%q0,|), |)]%cn.
+      }
+  }
+
+@set #us/cmd.moves/categories = Reg
+
 
 /*
 =============================================================================
@@ -48,8 +99,12 @@
       @pemit %#=[v(prompt-err)] That's not a valid archetype.
     };
 
-  // Add the move to the list.
-  &moves #us = setunion(v(moves), [edit(%0,%b,~)]-[%1]-[%2], |);
+  // Add the move to the proper list.
+  &moves-[edit(%2,%b,_)] #us =
+    setunion(
+      v(moves-[edit(%2,%b,_)]),
+      [lcstr(%0)]~[%1], |
+    );
 
   @pemit %#= [v(prompt)] Move: %ch[caplist(%0)]%cn
     %ch%(%cn[ucstr(%1)]%ch%)%cn added to archetype:
@@ -68,7 +123,7 @@
   registers:
     %0: The category to search for.
     %q<name>: The name of the category.
-    %q<detail>: The specific detail. 
+    %q<detail>: The specific detail.
 
 =============================================================================
 */
@@ -84,73 +139,41 @@
       valid categories are: [itemize(v(categories),|)].
   };
 
-  // Show different messages for a few different states of the moves
-  @switch lcstr(%q<name>) =
-    archetype, {
+  // capture the archetype if there is one.  Else, all.
+  [setq(+,switch(gt(words(%q<detail>),0), 1, trim(%q<detail>), all), arc)];
 
-      // Make sure it's a valid archetype.
-      @assert match(v(archetypes), %q<detail>) = {
-        @pemit %#=Valid archetypes are: [itemize(caplist(v(archetypes,|)))].
-      };
+  // Make sure it's a valid archetype.
+  @assert match(v(archetypes), lcstr(%q<arc>), |) = {
+    @pemit %#=%chValid archetypes are:%cn [itemize(v(archetypes),|)].
+  };
 
-      @pemit %#=
-        [u(
-          fn.moves.display, 
-          %q<name>*%q<detail>, 
-          Archetype%([caplist(%q<detail>)]%)
-        )]
-
-    },
-    corruption, {
-     
-     // Make sure it's a valid archetype.
-      @assert match(v(archetypes), %q<detail>) = {
-        @pemit %#=Valid archetypes are: [itemize(caplist(v(archetypes,|)))].
-      };
-
-      @pemit %#=
-        [u(
-          fn.moves.display, 
-          %q<name>*%q<detail>, 
-          Corruption%([caplist(%q<detail>)]%)
-        )]
-
-    },
-    {
-      @pemit %#= [u(fn.moves.display, %0, %0)]
-    }
-
-
+  @pemit %#=
+    [setq(+, %ch[capstr(%q<name>)]%cn moves for %ch[caplist(%q<arc>)]%cn, title)]
+    [u(
+      fn.moves.display,
+        %q<name>,
+        %q<arc>,
+        %q<title>
+    )]
 
 &fn.move.titles #us =
-  sort(
+  [sort(
     map(
       fn.trim.move,
-      filter(fn.filter.moves, v(moves), |,,%0), |
+      filter(fn.filter.moves, v(moves-[edit(%1,%b,_)]), |,,%0), |
     ),,|
-  )
-
+  )]
 
 &fn.moves.display #us =
-  [u(#gfo/header,,[capstr(%1)] Moves List)]%r
-  [u(fn.twocol,u(fn.move.titles, %0))]%r[u(#gfo/header)]%r                                                             MFORM: 7 lines generated, 1 lines quoted.                                                  │ 18   ┊ ┊ ┊ Valid Categories are: [itemize(v(categories),|)].
+  [u(#gfo/header-c, %2)]%r
+  [u(fn.twocol,u(fn.move.titles, %0, %1))]%r[u(#gfo/header)]%r
+  %ch%cy*%cn Valid Categories are: %ch[itemize(caplist(v(categories), |), |)]%cn.
 
 
 
 
-&fn.filter.moves #us = match(%0, *[lcstr(%1)]*)
+&fn.filter.moves #us = match(%0, *~[lcstr(%1)], |)
 &fn.twocol  #us = columns(%0,38,2,,,,,,,,|)
-&fn.trim.move #us= caplist(edit(first(%0,-),~,%b))
-
-&cmd.moves2 #us= $\+moves (.*):\s?(.*):
-  @switch lcstr(%1) =
-    archetype, {
-      @pemit %#=[u(fn.moves.display, %2, Archetype%(%2%))]
-    },
-    corruption, {
-      @pemit %#=[u(fn.moves.display, %2, Corruption%(%))]
-    }
-
-
+&fn.trim.move #us= caplist(edit(first(%0,~),_,%b))
 
 
