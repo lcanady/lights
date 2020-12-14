@@ -60,20 +60,31 @@
 =============================================================================
 === +moves ==================================================================
 
-  list the moves that are relevant to you.
+  list the moves based on basic search criteria.  To aearch for most moves,
+  the system only needs the category, basic, debt, etc unless looking up
+  information for archetype and corruptions moves.  Those haave to be
+  specified in the `+moves <category>:<detail>`  So `+moves archetype/the vamp`
+
+  registers:
+    %0: The category to search for.
+    %q<name>: The name of the category.
+    %q<detail>: The specific detail. 
 
 =============================================================================
 */
 
 
 &cmd.moves #us = $+moves *:
+
+  // Before anything we need to make sure we're not dealing with a two part rg.
   [setq(+, before(%0,:), name)]
-  [setq(+, after(%0, :), detail)]
+  [setq(+, after(%0, :), detail)];
   @assert match(v(categories), %q<name>, |) = {
     @pemit %#=[v(prompt-err)] That's nota valid category.
       valid categories are: [itemize(v(categories),|)].
   };
 
+  // Show different messages for a few different states of the moves
   @switch lcstr(%q<name>) =
     archetype, {
 
@@ -91,11 +102,25 @@
 
     },
     corruption, {
-      @pemit %#=[v(prompt-warning)] You must use +moves corruption: <type>
+     
+     // Make sure it's a valid archetype.
+      @assert match(v(archetypes), %q<detail>) = {
+        @pemit %#=Valid archetypes are: [itemize(caplist(v(archetypes,|)))].
+      };
+
+      @pemit %#=
+        [u(
+          fn.moves.display, 
+          %q<name>*%q<detail>, 
+          Corruption%([caplist(%q<detail>)]%)
+        )]
+
     },
     {
       @pemit %#= [u(fn.moves.display, %0, %0)]
     }
+
+
 
 &fn.move.titles #us =
   sort(
