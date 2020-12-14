@@ -61,6 +61,23 @@
       }
   }
 
+  @if strmatch(lcstr(%2), del) = {
+    
+    [setq(0, iter(%3, trim(##),%,,|))];
+    // Figure out the type we're removing from.
+    @switch/first lcstr(%1) = 
+      cat*, { 
+        &categories #us = setdiff(v(categories), lcstr(%q0), |, |);
+        @pemit %#=[v(prompt)] Categorie%(s%) removed: 
+          %ch[itemize(caplist(%q0, |), |)]%cn.
+      },
+      arc*, {
+        &archetypes #us = setdiff(v(archetypes), lcstr(%q0), |, |);
+        @pemit %#=[v(prompt)] Archetype%(s%) removed: 
+          %ch[itemize(caplist(%q0,|), |)]%cn.
+      }
+  }
+
 @set #us/cmd.moves/categories = Reg
 
 
@@ -156,6 +173,15 @@
         %q<title>
     )]
 
+/*
+=============================================================================
+=== fn.move.titles ==========================================================
+
+  Get a formatted list of titles from a raw list of moves.
+
+=============================================================================
+*/
+
 &fn.move.titles #us =
   [sort(
     map(
@@ -163,6 +189,15 @@
       filter(fn.filter.moves, v(moves-[edit(%1,%b,_)]), |,,%0), |
     ),,|
   )]
+
+/*
+=============================================================================
+=== fn.moves.display ========================================================
+
+
+
+=============================================================================
+*/
 
 &fn.moves.display #us =
   [u(#gfo/header-c, %2)]%r
