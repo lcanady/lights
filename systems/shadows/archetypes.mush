@@ -1,0 +1,20 @@
+/*
+=============================================================================
+=== +archetype/add <archtype> ===============================================
+
+  Add an archetype to the game.
+  
+  registers:
+    %0: Archetype Name
+
+=============================================================================
+*/
+
+&cmd.archetype/add #us=$+archetype/add *:
+  
+  @include #us/wiz_check=%#;
+  &archetypes #us= setunion(v(archetypes), lcstr(%0), |, |);
+  @pemit %#=[v(prompt)] Archetype%(s%) 
+    %ch[itemize(caplist(%0),|)]%cn added.
+
+

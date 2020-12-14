@@ -9,33 +9,123 @@
 
 &cmd.moves/categories #us =$+moves/categories *:
   @include %!/wiz_check=%#;
-  &categories #usmd = %0;
-  @pemit %#=[v(prompt)] Categories: [itemize(%0, |)] added.
+  &categories #us = setunion(v(categories), lcstr(%0), |, |);
+  @pemit %#=[v(prompt)] Categorie%(s%) added:
+    %ch[itemize(caplist(%0), |)]%cn.
 
 /*
 =============================================================================
-=== Command: +moves/add <title>|<faction>|<category>=<details> ==============
+=== Command: +moves/add <title>/<category>=<Archetype> ======================
 
-  Add/Edit a new move to the move database.
+  Add/Edit a new move to the move database. We don't want any copyright
+  infringement or anything, so we won't be saving the details of the moves,
+  just the title, faction and category.  For details consult the book!
 
   registers:
     %0: Title
-    %1: Faction
-    %2: Category
-    %3: Details
+    %1: Category
+    %2: Archetype (Or All)
 
 =============================================================================
 */
 
-&cmd.moves/add #us = $+moves/add *|*|*=*:
+&cmd.moves/add #us = $+moves/add */*=*:
   @include %!/wiz_check = %#;
-  
+
   // Does the category exist?
-  @assert match(get(#usmd/categories),%2, |) = {
+  @assert match(get(#us/categories),%1, |) = {
     @pemit %#=[v(prompt-error)] That's not a valid category.
   };
 
-  &move-[edit(%0,%b,~)] #usmd= %1|%2|%3;
-  @pemit %#= [v(prompt)] Move: %ch[capstr(%0)]%cn
-    %(%ch%cx[lcstr(%2)]%cn%) added to faction: %ch[capstr(%1)]%cn.%r
-    [v(prompt)] Use '%ch+moves/view [lcstr(%0)]' to preview.
+  // Does the archetype match one listed, or 'all'?
+  @assert
+    or(
+      match(
+        get(%!/archetypes), %2, |
+      ),
+      match(all, lcstr(%2))
+    ) = {
+      @pemit %#=[v(prompt-err)] That's not a valid archetype.
+    };
+
+  // Add the move to the list.
+  &moves #us = setunion(v(moves), [edit(%0,%b,~)]-[%1]-[%2], |);
+
+  @pemit %#= [v(prompt)] Move: %ch[caplist(%0)]%cn
+    %ch%(%cn[ucstr(%1)]%ch%)%cn added to archetype:
+    %ch[capstr(%2)]%cn.
+
+
+/*
+=============================================================================
+=== +moves ==================================================================
+
+  list the moves that are relevant to you.
+
+=============================================================================
+*/
+
+
+&cmd.moves #us = $+moves *:
+  [setq(+, before(%0,:), name)]
+  [setq(+, after(%0, :), detail)]
+  @assert match(v(categories), %q<name>, |) = {
+    @pemit %#=[v(prompt-err)] That's nota valid category.
+      valid categories are: [itemize(v(categories),|)].
+  };
+
+  @switch lcstr(%q<name>) =
+    archetype, {
+
+      // Make sure it's a valid archetype.
+      @assert match(v(archetypes), %q<detail>) = {
+        @pemit %#=Valid archetypes are: [itemize(caplist(v(archetypes,|)))].
+      };
+
+      @pemit %#=
+        [u(
+          fn.moves.display, 
+          %q<name>*%q<detail>, 
+          Archetype%([caplist(%q<detail>)]%)
+        )]
+
+    },
+    corruption, {
+      @pemit %#=[v(prompt-warning)] You must use +moves corruption: <type>
+    },
+    {
+      @pemit %#= [u(fn.moves.display, %0, %0)]
+    }
+
+&fn.move.titles #us =
+  sort(
+    map(
+      fn.trim.move,
+      filter(fn.filter.moves, v(moves), |,,%0), |
+    ),,|
+  )
+
+
+&fn.moves.display #us =
+  [u(#gfo/header,,[capstr(%1)] Moves List)]%r
+  [u(fn.twocol,u(fn.move.titles, %0))]%r[u(#gfo/header)]%r                                                             MFORM: 7 lines generated, 1 lines quoted.                                                  │ 18   ┊ ┊ ┊ Valid Categories are: [itemize(v(categories),|)].
+
+
+
+
+&fn.filter.moves #us = match(%0, *[lcstr(%1)]*)
+&fn.twocol  #us = columns(%0,38,2,,,,,,,,|)
+&fn.trim.move #us= caplist(edit(first(%0,-),~,%b))
+
+&cmd.moves2 #us= $\+moves (.*):\s?(.*):
+  @switch lcstr(%1) =
+    archetype, {
+      @pemit %#=[u(fn.moves.display, %2, Archetype%(%2%))]
+    },
+    corruption, {
+      @pemit %#=[u(fn.moves.display, %2, Corruption%(%))]
+    }
+
+
+
+

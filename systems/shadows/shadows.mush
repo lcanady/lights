@@ -18,20 +18,6 @@
     @set #us = safe inherit no_modify;
   }
 
-@if not(isdbref(tag(usmd))) = {
-    @create Urban Shadows Move Database <USMD>;
-    @tag/add usmd = lastcreate(me, t);
-    @set #usmd=safe no_modify;
-    @tel #usmd=#us;
-  }
-
-@if not(isdbref(tag(usad))) = {
-    @create Urban Shadows Archtype Database <USAD>;
-    @tag/add usad = lastcreate(me,t);
-    @set #usad = safe no_modify;
-    @tel #usad=#us;
-  }
-
 &stats #us = blood|heart|mind|spirit|mortality|night|power|wild
 &tags #us = 
   anchored|
