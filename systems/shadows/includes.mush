@@ -1,4 +1,10 @@
-
+#def @make/thing (.*)=(.*)
+@if not(isdbref(tags($2))) = {
+    @create $1;
+    @tag/add $2=lastcreate(me, t);
+    @set #$2= safe no_modify inherit sidefx;
+  }
+#enddef
 
 &wiz_check #us = 
   @assert gte(bittype(%0), 6) = {

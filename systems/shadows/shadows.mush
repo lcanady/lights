@@ -9,17 +9,14 @@
 =============================================================================
 */
 
-// Conditionally create the main objects for the Urban Shadows Rulesystem
-// Skip if the tags() used by the system already exist.  Good for
-// Iteration and installers. 
-@if not(isdbref(tag(us))) = {
-    @create Urban Shadows Rules Engine <US>;
-    @tag/add us=lastcreate(me, t);
-    @set #us = safe inherit no_modify;
-  }
+#include ./includes.mush
 
-&stats #us = blood|heart|mind|spirit|mortality|night|power|wild
-&tags #us = 
+// Create System Objects (includes.mush)
+@make/thing Urban Shadows Rules Engine <US>=us
+@make/thing Urban Shadows Database <USD>=usd
+
+&stats #usd = blood|heart|mind|spirit|mortality|night|power|wild
+&tags #usd = 
   anchored|
   ap|
   area|

@@ -12,7 +12,7 @@
   )]
 
 &header-c #gfo= printf($77:%cb=%ch-%cn:^s, u(#gfo/frame, %0))
-
+&header-l #gfo= printf($77:%cb=%ch-%cn:-s, u(#gfo/frame, %0))
 &frame #gfo= if(strlen(%0), %cy<%ch<%cn %0 %ch%cy>%cn%cy>%cn)
 
 &fn.marker #gfo= 

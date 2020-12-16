@@ -1,13 +1,13 @@
 /*
 #############################################################################
 ### MOVES ###################################################################
-  
+
   This file has all of the commands and functions relative to the +moves
   system for the PbTA Engine.
 
   TODO: See if I need to add a notes section.
   TODO: Also See about moving move data over to it's own dedicated object.
-  
+
   Syntax:
     +categories/add <item>[,<item>[,<itemN>]]
     +categories/del <item>[,<item>[,<itemN>]]
@@ -17,9 +17,9 @@
 
     +moves/add <title>/<category>=<archetype>
     +moves/del <archetype>=<title>
-    
+
     +moves <category>[:<archetype>]
-??  +moves <title>
+    +moves/note <move>/<archetyoe> = <note>
 
 #############################################################################
 */
@@ -30,7 +30,7 @@
 === Command: +<categories>|<archetypes>/add <item>[,<itemN>] ================
 
   Add a list of archetypes or categories to the PBtA Rules Engine.
-  
+
   registers:
     %0: The entire regex match
     %1: The type of add (archetype or category)
@@ -43,39 +43,21 @@
 &cmd.moves/categories #us =$\+(archetypes|categories)\/(add|del)\s*?(.*):
   @include %!/wiz_check=%#;
 
+  //Switch the input from a comma seperated list, into
+  // a pipe seprated situation.  Less escaping that way!
+  [setq(+, iter(%3, lcstr(trim(##)), %,, |), args)];
+
   // If this is an add request, process it.
   @if strmatch(lcstr(%2), add) = {
-    
-    [setq(0, iter(%3, trim(##),%,,|))];
-    // Figure out the type we're adding too.
-    @switch/first lcstr(%1) = 
-      cat*, { 
-        &categories #us = setunion(v(categories), lcstr(%q0), |, |);
-        @pemit %#=[v(prompt)] Categorie%(s%) added: 
-          %ch[itemize(caplist(%q0, |), |)]%cn.
-      },
-      arc*, {
-        &archetypes #us = setunion(v(archetypes), lcstr(%q0), |, |);
-        @pemit %#=[v(prompt)] Archetype%(s%) added: 
-          %ch[itemize(caplist(%q0,|), |)]%cn.
-      }
-  };
+    &%1 #usd = setunion(get(#usd/%1), lcstr(%q<args>), |, |);
+    @pemit %#=[v(prompt)] [capstr(%1)] added:
+      %ch[itemize(u(fn.caplist, %q<args>), |)]%cn.
+    };
 
   @if strmatch(lcstr(%2), del) = {
-   
-    [setq(0, iter(%3, trim(##),%,,|))];
-    // Figure out the type we're removing from.
-    @switch/first lcstr(%1) = 
-      cat*, { 
-        &categories #us = setdiff(v(categories), lcstr(%q0), |, |);
-        @pemit %#=[v(prompt)] Categorie%(s%) removed: 
-          %ch[itemize(caplist(%q0, |), |)]%cn.
-      },
-      arc*, {
-        &archetypes #us = setdiff(v(archetypes), lcstr(%q0), |, |);
-        @pemit %#=[v(prompt)] Archetype%(s%) removed: 
-          %ch[itemize(caplist(%q0,|), |)]%cn.
-      }
+    &%1 #usd = setdiff(get(#usd/%1), lcstr(%q<args>), |, |);
+    @pemit %#=[v(prompt)] [capstr(%1)] removed:
+       %ch[itemize(u(fn.caplist, %q<args>), |)]%cn.
   };
 
 @set #us/cmd.moves/categories = Reg
@@ -89,10 +71,11 @@
 
 =============================================================================
 */
-&cmd.categories #us= $\+(categories|archetypes):
-   @pemit %#=[v(prompt)] The following [lcstr(%1)] are available: 
-      %ch[itemize(caplist(v(%1), |), |)]%cn. 
-  
+&cmd.categories #us= $\+(categories|archetypes)$:
+   @pemit %#=
+    [v(prompt)] The following %ch[capstr(%1)]%cn are available: 
+    [itemize(u(fn.caplist, get(#usd/%1)), |)].
+
 @set #us/cmd.categories = Reg
 
 
@@ -116,7 +99,7 @@
   @include %!/wiz_check = %#;
 
   // Does the category exist?
-  @assert match(get(#us/categories),%1, |) = {
+  @assert match(get(#usd/categories),%1, |) = {
     @pemit %#=[v(prompt-error)] That's not a valid category.
   };
 
@@ -128,13 +111,13 @@
       ),
       match(all, lcstr(%2))
     ) = {
-      @pemit %#=[v(prompt-err)] That's not a valid archetype.
+      @pemit %#=[v(prompt-error)] That's not a valid archetype.
     };
 
   // Add the move to the proper list.
-  &moves-[edit(%2,%b,_)] #us =
+  &moves-[edit(%2,%b,_)] #usd =
     setunion(
-      v(moves-[edit(%2,%b,_)]),
+      get(#usd/moves-[edit(%2,%b,_)]),
       [lcstr(%0)]~[%1], |
     );
 
@@ -145,7 +128,7 @@
 
 /*
 =============================================================================
-=== +moves ==================================================================
+=== +moves [<category>] =====================================================
 
   list the moves based on basic search criteria.  To aearch for most moves,
   the system only needs the category, basic, debt, etc unless looking up
@@ -161,22 +144,26 @@
 */
 
 
-&cmd.moves #us = $+moves *:
+&cmd.moves #us = $\+moves\s*?(.*)?:
 
   // Before anything we need to make sure we're not dealing with a two part rg.
-  [setq(+, before(%0,:), name)]
-  [setq(+, after(%0, :), detail)];
-  @assert match(v(categories), %q<name>, |) = {
-    @pemit %#=[v(prompt-err)] That's nota valid category.
-      valid categories are: [itemize(v(categories),|)].
+  [setq(+, before(trim(%1),:), name)]
+  [setq(+, after(trim(%1), :), detail)];
+ 
+  @assert match(get(#usd/categories), %q<name>, |) = {
+    @pemit %#=[v(prompt-error)] That's nota valid category. 
+      valid categories are: %ch[itemize(caplist(get(#usd/categories), |), |)]%cn.%r
+      [v(prompt-error)] To specify an archetype, use 
+      '%ch+moves <category>:<archetyoe>%cn'.
   };
 
   // capture the archetype if there is one.  Else, all.
   [setq(+,switch(gt(words(%q<detail>),0), 1, trim(%q<detail>), all), arc)];
 
   // Make sure it's a valid archetype.
-  @assert match(v(archetypes), lcstr(%q<arc>), |) = {
-    @pemit %#=%chValid archetypes are:%cn [itemize(v(archetypes),|)].
+  @assert match(get(#usd/archetypes), lcstr(%q<arc>), |) = {
+    @pemit %#=%chValid archetypes are:%cn 
+      [itemize(u(#usd/caplist, get(#usd/archetypes)),|)].
   };
 
   @pemit %#=
@@ -187,6 +174,92 @@
         %q<arc>,
         %q<title>
     )]
+
+
+@set #us/cmd.moves = Reg
+
+/*
+=============================================================================
+=== +move/note <move>/<archetype>=<value> ===================================
+
+  Add a note to a move.  The resulting move will have a '+' next to their
+  name and ansi for those who can see color.
+
+=============================================================================
+*/
+
+&cmd.moves/note #us= $+moves/note */*=*:
+
+  [setq(+, lcstr(get(#usd/moves-[%1])), moves)];
+
+  @import %!/wiz_check = %#;
+
+  @assert words(%q<moves>) = {
+    @pemit %#=[v(prompt-error)] That's not a valid archetype,
+      or it has no moves.
+  };
+
+  @assert setr(+, match(%q<moves>, [lcstr(%0)]*, |), move_num) = {
+    @pemit %#=[v(prompt-error)] That's not a valid move.
+  };
+
+  &note-[edit(%0,%b,_)] #usd = %2;
+  @pemit %#=
+    [setq(+, before(extract(%q<moves>, %q<move_num>, 1, |),~), move)]
+    [v(prompt)] Note added for move %ch[caplist(%q<move>)]%cn.
+
+/*
+=============================================================================
+=== +move/view [<name>] =======================================================
+
+  View any notes for a specific move. 
+
+  registers:
+    %1: Move Name 
+  
+=============================================================================
+*/
+&cmd.moves/view #us = $\+move\s+?(.*):
+ 
+  // capturing everyting in a register called 'moves'.
+  [setq(+,
+    // Iterate through all the move attributes in the database.
+    iter(
+      lattr(#usd/moves-*),
+      extract( 
+        // Save the list, and the list archetype.
+        lcstr(setr(+, get(#usd/[setr(+, ##, name)]), list)),
+        // If there's a match it will be extracted from the move list.
+        match(%q<list>, [lcstr(trim(%1))]~*, |), 
+        1, |
+      ),,|
+    ), moves
+  )];
+  // Whew!
+
+  @assert words(%q<moves>) = {
+    @pemit %#=[v(prompt-error)] Move not found.%r
+      [v(prompt-error)] Type %ch+categories%cn for a list 
+      of move categories.
+  };
+
+  @pemit %#= 
+    [setq(+, extract(%q<moves>, 1, 1, |), move)]
+    [u(
+      #gfo/header-l,
+      caplist(setr(+, before(%q<move>, ~),move_name))
+    )]%r
+    %r[default(
+      #usd/note-[edit(%q<move_name>,%b,_)],
+      No Note Available.
+    )]%r%r
+    [u(
+      #gfo/header,
+      caplist(after(%q<move>,~)),,
+      caplist(lcstr(edit(after(%q<name>, -), _, %b)))
+    )]
+
+@set #us/cmd.moves/view = Reg
 
 /*
 =============================================================================
@@ -201,7 +274,7 @@
   [sort(
     map(
       fn.trim.move,
-      filter(fn.filter.moves, v(moves-[edit(%1,%b,_)]), |,,%0), |
+      filter(fn.filter.moves, get(#usd/moves-[edit(%1,%b,_)]), |,,%0), |
     ),,|
   )]
 
@@ -217,11 +290,11 @@
 &fn.moves.display #us =
   [u(#gfo/header-c, %2)]%r
   [u(fn.twocol,u(fn.move.titles, %0, %1))]%r[u(#gfo/header)]%r
-  %ch%cy*%cn Valid Categories are: %ch[itemize(caplist(v(categories), |), |)]%cn.
+  %ch%cy*%cn Valid Categories are: %ch[itemize(caplist(get(#usd/categories), |), |)]%cn.
 
 
 
-
+&fn.caplist #us=iter(%0, %ch[caplist(##)]%cn, |,|)
 &fn.filter.moves #us = match(%0, *~[lcstr(%1)], |)
 &fn.twocol  #us = columns(%0,38,2,,,,,,,,|)
 &fn.trim.move #us= caplist(edit(first(%0,~),_,%b))

@@ -1,0 +1,75 @@
+/*
+#############################################################################
+### JSON COMMUNICATION SYSTEM ###############################################
+
+  This is the softcoded JSON subsystem for RhostMUSH.  It's the basis 
+  behind the frontend working and the server being able to communicate 
+  with the web in an OOB manner for the webclient and any web based tools.
+
+  functions:
+    json()      - creates a container JSON object
+    key()       - add a new key/value pair.
+    array()     - creates an array.
+    checksum()  - creates a randomly generated string used to verify
+                  communication from the server.
+
+#############################################################################
+*/
+
+
+// Conditionally create the JSON object if it doesn't already exist.
+@if not(isdbref(tag(json))) = {
+    @create Global: JSON;
+    @tag/add json = lastcreate(me, t);
+    @set #json = safe inherit no_modify sidefx;
+  }  
+
+
+@startup #json = @dolist lattr(%!/ufun.*) = {
+    // Handle each ufun.
+    @switch/first lcstr(##)) =
+      *.priv.*, {
+        @function/priv/pres [after(##, UFUN.PRIV.)] = %!/##;
+      },
+      { @function/pres [after(##,UFUN.)] = %!/## }
+  }
+
+
+&fn.check #json = 
+  encrypt(num(*%0),)
+
+/*
+-----------------------------------------------------------------------------
+--- ufn.json ----------------------------------------------------------------
+
+  SYNTAX: json(<item>[, <item> [, <itemN>]])
+  
+  Creates a JSON object containing key/value pairs, arrays, and other nested
+  json objects.
+
+-----------------------------------------------------------------------------
+*/
+
+&ufun.json #json = %{[iter(%0, ##, |, %,)]%}
+
+/*
+-----------------------------------------------------------------------------
+--- ufun.key ----------------------------------------------------------------
+
+  SYNTAX: key(key, value)
+
+  used to format basic key/value pairs.  Doesn't handle
+
+-----------------------------------------------------------------------------
+*/
+
+&ufun.key #json = "%0":
+  [switch(1,
+    isnum(%1), %1,
+    strmatch(lcstr(%1), null), null,
+    strmatch(lcstr(%1), true), true,
+    strmatch(lcstr(%1), false), false,
+    "[%1]"
+  )]
+
+
