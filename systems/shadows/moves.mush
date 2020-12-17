@@ -1,3 +1,5 @@
+#include ./moves_help.mush
+
 /*
 #############################################################################
 ### MOVES ###################################################################
@@ -144,7 +146,7 @@
 */
 
 
-&cmd.moves #us = $\+moves\s*?(.*)?:
+&cmd.moves #us = $\+moves\s+?(.*):
 
   // Before anything we need to make sure we're not dealing with a two part rg.
   [setq(+, before(trim(%1),:), name)]
@@ -219,7 +221,7 @@
   
 =============================================================================
 */
-&cmd.moves/view #us = $\+move\s+?(.*):
+&cmd.moves/view #us = $\+move\/view\s+?(.*):
  
   // capturing everyting in a register called 'moves'.
   [setq(+,

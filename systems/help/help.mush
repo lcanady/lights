@@ -1,0 +1,20 @@
+/*
+#############################################################################
+### +HELP SYSTEM ############################################################
+
+  This is an alternate +help system friendly with the mush-format, 
+  formatting system. (https://github.com/digibear-io/mush-format).
+
+  commands:
+    +help/add [<topic>/]<title>=<entry>
+    +help/del <title>
+    +help/hide <title>
+    +help/show <title>
+    +help [<title>]
+
+#############################################################################
+*/
+
+#include ../test.mush 
+
+@make/thing Globals: +Help=help

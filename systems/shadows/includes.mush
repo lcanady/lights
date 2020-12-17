@@ -2,7 +2,7 @@
 @if not(isdbref(tags($2))) = {
     @create $1;
     @tag/add $2=lastcreate(me, t);
-    @set #$2= safe no_modify inherit sidefx;
+    @set #$2 = no_modify sidfx inherit safe;
   }
 #enddef
 
