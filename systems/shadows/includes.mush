@@ -1,16 +1,3 @@
-#def @make/thing (.*)=(.*)
-@if not(isdbref(tags($2))) = {
-    @create $1;
-    @tag/add $2=lastcreate(me, t);
-    @set #$2 = no_modify sidfx inherit safe;
-  }
-#enddef
-
-&wiz_check #us = 
-  @assert gte(bittype(%0), 6) = {
-    @pemit %#=Permission denied.
-  }
-
 &prompt #us = %ch%cg-%cn
 &prompt-warn #us = %ch%cy-%cn
 &prompt-error #us = %ch%cr-%cn

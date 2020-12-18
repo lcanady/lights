@@ -19,5 +19,4 @@
 #include ./parents/player.mush
 #include ./parents/exit.mush
 #include ./parents/thing.mush
-
 #include ./systems/shadows/shadows.mush

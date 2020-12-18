@@ -9,6 +9,7 @@
 =============================================================================
 */
 
+
 #include ./includes.mush
 
 // Create System Objects (includes.mush)
@@ -44,6 +45,6 @@
   1-armor|
   2-armor
 
-#include ./moves.mush
-#include ./archtypes.mush
-#include ./chargen.mush
+#include /moves.mush
+#include /archtypes.mush
+#include /chargen.mush

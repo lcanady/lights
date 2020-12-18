@@ -43,7 +43,7 @@
 */
 
 &cmd.moves/categories #us =$\+(archetypes|categories)\/(add|del)\s*?(.*):
-  @include %!/wiz_check=%#;
+  @include #gfo/wiz_check=%#;
 
   //Switch the input from a comma seperated list, into
   // a pipe seprated situation.  Less escaping that way!
@@ -98,7 +98,7 @@
 */
 
 &cmd.moves/add #us = $+moves/add */*=*:
-  @include %!/wiz_check = %#;
+  @include #gfo/wiz_check = %#;
 
   // Does the category exist?
   @assert match(get(#usd/categories),%1, |) = {
@@ -194,7 +194,7 @@
 
   [setq(+, lcstr(get(#usd/moves-[%1])), moves)];
 
-  @import %!/wiz_check = %#;
+  @import #gfo/wiz_check = %#;
 
   @assert words(%q<moves>) = {
     @pemit %#=[v(prompt-error)] That's not a valid archetype,

@@ -15,6 +15,6 @@
 #############################################################################
 */
 
-#include ../test.mush 
-
+#include ../../utils.mush
 @make/thing Globals: +Help=help
+

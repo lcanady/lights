@@ -1,9 +1,18 @@
-@if not(isdbref(tag(gfo))) = {
-    @create Global Function Object <GFO>;
-    @tag/add gfo = lastcreate(me, t);
-    @set #gfo = safe inherit no_modify sidefx;
+#def @make/thing (.*)=(.*)
+@if not(isdbref(tags($2))) = {
+    @create $1;
+    @tag/add $2=lastcreate(me, t);
+    @set #$2 = no_modify sidfx inherit safe;
   }
+#enddef
 
+
+@make/thing Global: Global Function Object <GFO>=gfo
+
+&wiz_check #gfo = 
+  @assert gte(bittype(%0), 6) = {
+    @pemit %#=Permission denied.
+  }
 
 &header #gfo= 
   [printf(
