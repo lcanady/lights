@@ -4,5 +4,5 @@
     @set #tp = safe no_modify;
   }
 
-&placement #tp = %ch%cx%,%bsits here.%cn
+&placement #tp = %bsits here.
 

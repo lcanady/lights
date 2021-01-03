@@ -1,0 +1,8 @@
+
+&fakecommands #fl = json
+
+&run_json #fl = 
+  [json(
+    key(command, token)|
+    key(token, encode64(encrypt(secs(),secs()))),|
+  )]

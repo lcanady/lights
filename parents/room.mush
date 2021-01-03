@@ -33,18 +33,18 @@
 // the desc before showing it to the room contents.
 
 @set #rp/desc = default
-&formatdesc #rp =%r%0%r
+&formatdesc #rp =%r[wrap(%0,78,l,,,4)]
 
 @conformat #rp =
 
   [if( 
     or(not(hasflag(%!,dark)),gte(bittype(%#),2)),
-    [u(#gfo/header, Characters)]%r
+    %r[u(#gfo/header, Characters)]%r
     [space(3)]
     %ch[ljust(Name, 25)]
     [rjust(Idle, 5)]%b%b
     Title%cn%r
-    [repeat(%ch%cb-%cn,77)]
+    [repeat(%cy-%cn,77)]
     [iter(
           [lcon(%!/connect)],
         %r[u(%!/fn.player, ##)]
@@ -80,14 +80,14 @@
     u(#gfo/fn.marker,%0),
     cname(%0),
     objeval(%!, singletime(idle(%0))),
-    objeval(%!, default(%0/caption, %ch%cxThe citizen.%cn))
+    objeval(%!, default(%0/caption, The citizen.))
   )
 
 &fn.things #rp = 
   if(
     strlen(%0),
-    [space(3)]%ch%cxa%cn [cname(%0)]
-    [objeval(%!,udefault(%0/placement, %b%ch%cx%,sits here.%cn))]
+    [space(3)]a [cname(%0)]
+    [objeval(%!,udefault(%0/placement, %b%,sits here.))]
   )
 
 &fn.exits #rp = [edit(edit(cname(%0),<,%cy<%cn),>,%cy>%cn)]%b%b
