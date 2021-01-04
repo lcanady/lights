@@ -7,13 +7,25 @@
   with the web in an OOB manner for the webclient and any web based tools.
 
   functions:
-    json()      - creates a container JSON object
-    key()       - add a new key/value pair.
-    jarray()    - creates an array.
-    checksum()  - creates a randomly generated string used to verify
-                  communication from the server.
-    fn_datatype - a local function to check what datatype is being passed
-                  and if it should add qoutes or not.
+    json()          - creates a container JSON object
+    key()           - add a new key/value pair.
+    jarray()        - creates an array.
+    securestring()  - creates a randomly generated string used to verify
+                      communication from the server.
+    fn_datatype     - a local function to check what datatype is being 
+                      passed and if it should add qoutes or not.
+
+  A Typical json string would be composed of these various parts. Everything
+  must be composed from a base json() function, but can then be combined and
+  nested to create a fully compliant JSON string.
+
+  Ex:
+    json(
+      key(token, securestring())|
+      key(command, AwesomeCommand)|
+      key(someArgs,jarray(1 2 3 4 5)), |
+    )
+    
 #############################################################################
 */
 
@@ -39,10 +51,10 @@
 -----------------------------------------------------------------------------
 --- ufn.json ----------------------------------------------------------------
 
-  SYNTAX: json(<item>[, <item> [, <itemN>]])
+  SYNTAX: json(<item> [<item> [<itemN>]], <delim>)
   
   Creates a JSON object containing key/value pairs, arrays, and other nested
-  json objects.
+  json objects.  If <delim> is not defined, then it defaults to spaces.
 
 -----------------------------------------------------------------------------
 */
@@ -119,8 +131,6 @@
 -----------------------------------------------------------------------------
 */
 
-&fn.securestring #json = [set(%0, _jstring:[setr(0,encrypt(%1, [secs()]))])]
+&ufun.securestring #json = encode64(encrypt(%1, secs()))
   
-
-
 @tr #json/startup;
