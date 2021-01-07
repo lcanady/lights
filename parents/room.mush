@@ -23,22 +23,45 @@
   }
 
 @nameformat #rp =
-  [u(
-    #gfo/header,
-    cname(%!),,
-    if(hasflag(%!,IC), IC, OOC)
+  
+  [ifelse(
+      not(hastotem(%#,json)),
+      u(
+        #gfo/header,
+        cname(%!),,
+        if(hasflag(%!,IC), IC, OOC)
+      ),
+      json(
+        key(token, securestring())|
+        key(cmd, desc)|
+        key(name, name(%!))|
+        key(image, get(%!/image))|
+        key(location, default(%!/location, Somewhere))|
+        key(ic, ifelse(hasflag(%!,ic), true, false)),|
+      )
+    
   )]
 
 // Set the parent description defualt so we can manipulate
 // the desc before showing it to the room contents.
 
 @set #rp/desc = default
-&formatdesc #rp =%r[wrap(%0,78,l,,,4)]
+&formatdesc #rp =
+  [ifelse(
+    not(hastotem(%#, json)),
+    %r[wrap(%0,78,l,,,4)],
+    %0
+  )]
 
 @conformat #rp =
 
   [if( 
-    or(not(hasflag(%!,dark)),gte(bittype(%#),2)),
+    
+    and(
+      or(not(hasflag(%!,dark)), gte(bittype(%#), 2)),
+      not(hastotem(%#, json))
+    ),
+
     %r[u(#gfo/header, Characters)]%r
     [space(3)]
     %ch[ljust(Name, 25)]
@@ -68,9 +91,27 @@
       %r[ljc(u(%!/fn.things, extract(%q0, add(##, 1), 1)), 50)]
         [rjc(u(%!/fn.exits, extract(%q1, add(##, 1), 1)), 26)]
     )]
+
+  )]
+  
+  [if(
+    hastotem(%#, json),
+    json(
+      key(token, securestring())|
+      key(cmd, characters)|
+      key(
+        payload, 
+        jarray(
+          iter(
+            lcon(%!/connect),
+            objeval(%!, name(##))
+          )
+        )     
+      ),|
+    )
   )]
 
-@exitformat #rp = [u(#gfo/header)]
+@exitformat #rp = [if(not(hastotem(%#, json)), u(#gfo/header))]
 
 
 // Format room player list.

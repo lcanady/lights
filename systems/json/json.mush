@@ -25,7 +25,13 @@
       key(command, AwesomeCommand)|
       key(someArgs,jarray(1 2 3 4 5)), |
     )
-    
+
+
+  Commands:
+    @JSON  <string>   - Set the user's json totem, and confirm the secure
+                        string to attach to each subsiquent JSON message
+                        sent by the game.
+
 #############################################################################
 */
 
@@ -131,6 +137,22 @@
 -----------------------------------------------------------------------------
 */
 
-&ufun.securestring #json = encode64(encrypt(%1, secs()))
+&ufun.securestring #json = get(#json/securestring) 
   
+/*
+=============================================================================
+=== @json <string> ==========================================================
+
+  A helper command to set a user's json totem, as well as configure their
+  securestring for communicating verified json back and forth to the server.
+
+=============================================================================
+*/
+
+&cmd.@json #json = $@json *:
+  @totem %#=json;
+  &securestring %#=%0;
+  @tr %!/hook_json = %#, %0;
+
+
 @tr #json/startup;

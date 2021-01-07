@@ -1,0 +1,34 @@
+
+
+// If the hook object isn't created, create it.
+// else ignore this block and keep on moving.
+@if not(isdbref(tag(ho))) = {
+    @create Global: Hook Object <HO>;
+    @tag/add ho = lastcreate(me, t);
+    @set #ho = safe sidefx no_modify inherit;
+  }
+
+&m_say #41=
+  trim(if( 
+    not(%4),
+    [iter(
+      lcon(loc(%#),connect),
+      ifelse(
+        and(not(%4), hastotem(##,json)),
+        pemit(##,
+          json(
+            key(cmd, say)|
+            key(token, securestring())|
+            key(text, edit(lit(%0), ", &quot;))|
+            key(enactor, %#)|
+            key(name, cname(%#))|
+            key(image, get(%#/image))|
+            key(caption, get(%#/caption))|
+            key(title, get(%#/titlecaption)), |
+          )
+        ),
+        pemit(##,%0)
+      )
+    )]
+  ))
+  

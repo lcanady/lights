@@ -1,8 +1,27 @@
 
-&fakecommands #fl = json
+&fakecommands #fl = json|showlogin
 
+/*
+=============================================================================
+=== JSON ====================================================================
+
+  This connect screen command sends the initial token to the web client, 
+  where it will be stored, and returned once the user is connected.
+
+=============================================================================
+*/
 &run_json #fl = 
   [json(
-    key(command, token)|
-    key(token, encode64(encrypt(secs(),secs()))),|
+    key(cmd, token) |
+    key(token, securestring()), |
   )]
+
+&connect #fl=
+    [execscript(connect_file.sh)]
+  
+
+&run_showlogin #fl = 
+    json(
+      key(cmd, login) |
+      key(token, securestring()), |
+    )
