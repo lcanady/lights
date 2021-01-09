@@ -2,17 +2,18 @@
 #############################################################################
 ### JSON COMMUNICATION SYSTEM ###############################################
 
-  This is the softcoded JSON subsystem for RhostMUSH.  It's the basis 
-  behind the frontend working and the server being able to communicate 
+  This is the softcoded JSON subsystem for RhostMUSH.  It's the basis
+  behind the frontend working and the server being able to communicate
   with the web in an OOB manner for the webclient and any web based tools.
 
   functions:
+    jencode()       - serialize your json object for transport.
     json()          - creates a container JSON object
     key()           - add a new key/value pair.
     jarray()        - creates an array.
     securestring()  - creates a randomly generated string used to verify
                       communication from the server.
-    fn_datatype     - a local function to check what datatype is being 
+    fn_datatype     - a local function to check what datatype is being
                       passed and if it should add qoutes or not.
 
   A Typical json string would be composed of these various parts. Everything
@@ -20,17 +21,24 @@
   nested to create a fully compliant JSON string.
 
   Ex:
-    json(
-      key(token, securestring())|
-      key(command, AwesomeCommand)|
-      key(someArgs,jarray(1 2 3 4 5)), |
+    jencode(
+      json(
+        key(token, securestring())|
+        key(command, AwesomeCommand)|
+        key(someArgs,jarray(1 2 3 4 5)), |
+      )
     )
 
-
+  
   Commands:
-    @JSON  <string>   - Set the user's json totem, and confirm the secure
-                        string to attach to each subsiquent JSON message
-                        sent by the game.
+    jlogin <user> <pass> <string> - log into the game, set your json
+                                    totem, and also your security
+                                    string for this session.
+
+    @JSON  <string>               - Set the user's json totem, and 
+                                    confirm the secure string to attach to
+                                    eac subsiquent JSON message sent by the 
+                                    game.
 
 #############################################################################
 */
@@ -41,7 +49,7 @@
     @create Global: JSON;
     @tag/add json = lastcreate(me, t);
     @set #json = safe inherit no_modify;
-  }  
+  }
 
 // add any ufuns to the global function scope.
 @startup #json = @dolist lattr(%!/ufun.*) = {
@@ -58,19 +66,33 @@
 --- ufn.json ----------------------------------------------------------------
 
   SYNTAX: json(<item> [<item> [<itemN>]], <delim>)
-  
+
   Creates a JSON object containing key/value pairs, arrays, and other nested
   json objects.  If <delim> is not defined, then it defaults to spaces.
 
 -----------------------------------------------------------------------------
 */
 
-&ufun.json #json = 
-  edit(
-      edit(
-        %{[iter(%0, ##, if(words(%1),%1,%b), %,)]%},&lb;, %[
-      ), &rb;, %]
-  )
+
+&ufun.json #json = &lbr;[iter(%0, ##, if(words(%1),%1,%b), %^)]&rbr;
+
+
+/*
+-----------------------------------------------------------------------------
+--- ufun.jencode ------------------------------------------------------------
+
+  SYNTAX: jencode(<jsonTemplate>)
+ 
+  Encode a json template string into a serialized json string ready for 
+  transport.
+
+-----------------------------------------------------------------------------
+*/
+
+
+&ufun.jencode #json =
+  iter(regeditalllit( %0, &lbr;, %{, &rbr;, %}, &lb;, %[, &rb;, %]),##,^,%,)
+
 
 /*
 -----------------------------------------------------------------------------
@@ -88,17 +110,17 @@
 /*
 -----------------------------------------------------------------------------
 --- fn_valuetype ------------------------------------------------------------
-  
+
   This function adds quotes to a string, if nessisary, else it passes
   other datatypes 'as is'.
 
 -----------------------------------------------------------------------------
 */
 
-&fn_valuetype #json = 
+&fn_valuetype #json =
   [switch(1,
     isnum(%0), %0,
-    strmatch(%0, *%{*), %0,
+    strmatch(lcstr(%0), &lbr;*&rbr;), %0,
     strmatch(lcstr(%0), null), null,
     strmatch(lcstr(%0), true), true,
     strmatch(lcstr(%0), false), false,
@@ -110,19 +132,19 @@
 -----------------------------------------------------------------------------
 --- ufun.jarray -------------------------------------------------------------
 
-  Convert a list into an array. 
+  Convert a list into an array.
 
   USAGE: jarray(<item> [<item> [<itemN>]], <delim>)
 
 -----------------------------------------------------------------------------
 */
-  
-&ufun.jarray #json = 
+
+&ufun.jarray #json =
   &lb;
   [iter(
-    %0, 
-    u(#json/fn_valuetype, ##), 
-    if(words(%1),%1,%b), %,
+    %0,
+    u(#json/fn_valuetype,##),
+    if(words(%1),%1,%b), ^
   )]&rb;
 
 
@@ -137,8 +159,8 @@
 -----------------------------------------------------------------------------
 */
 
-&ufun.securestring #json = get(#json/securestring) 
-  
+&ufun.securestring #json = get(%0/_securestring)
+
 /*
 =============================================================================
 === @json <string> ==========================================================
@@ -151,8 +173,9 @@
 
 &cmd.@json #json = $@json *:
   @totem %#=json;
+  &_securestring %#=%0;
   &securestring %#=%0;
+  @pemit %# = jencode(json(key(token, securestring(%#))));
   @tr %!/hook_json = %#, %0;
-
 
 @tr #json/startup;

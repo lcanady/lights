@@ -11,17 +11,17 @@
 =============================================================================
 */
 &run_json #fl = 
-  [json(
+  [jencode(json(
     key(cmd, token) |
     key(token, securestring()), |
-  )]
+  ))]
 
 &connect #fl=
     [execscript(connect_file.sh)]
   
 
 &run_showlogin #fl = 
-    json(
+    jencode(json(
       key(cmd, login) |
       key(token, securestring()), |
-    )
+    ))

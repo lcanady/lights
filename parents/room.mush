@@ -31,15 +31,17 @@
         cname(%!),,
         if(hasflag(%!,IC), IC, OOC)
       ),
-      json(
-        key(token, securestring())|
-        key(cmd, desc)|
-        key(name, name(%!))|
-        key(image, get(%!/image))|
-        key(location, default(%!/location, Somewhere))|
-        key(ic, ifelse(hasflag(%!,ic), true, false)),|
+      jencode(
+        json(
+          key(token, securestring())|
+          key(cmd, desc)|
+          key(name, name(%!))|
+          key(image, get(%!/image))|
+          key(location, default(%!/location, Somewhere))|
+          key(ic, ifelse(hasflag(%!,ic), true, false))|
+          key(description, udefault(%!/desc, eval([parent(%!)]/desc))), |
+        )
       )
-    
   )]
 
 // Set the parent description defualt so we can manipulate
@@ -47,10 +49,9 @@
 
 @set #rp/desc = default
 &formatdesc #rp =
-  [ifelse(
+  [if(
     not(hastotem(%#, json)),
-    %r[wrap(%0,78,l,,,4)],
-    %0
+    %r[wrap(%0,78,l,,,4)]
   )]
 
 @conformat #rp =
@@ -94,22 +95,42 @@
 
   )]
   
+  // if the player has the json totem, then trigger a list of
+  // players also at their location.
   [if(
     hastotem(%#, json),
-    json(
-      key(token, securestring())|
-      key(cmd, characters)|
+    jencode(json(
+      key(token, securestring(%#))|
+      key(cmd, objects)|
       key(
-        payload, 
+        characters, 
         jarray(
           iter(
             lcon(%!/connect),
-            objeval(%!, name(##))
-          )
-        )     
+            name(##),,~
+          ),~
+        )
+      )|
+      key(things,
+        jarray(
+          iter(
+            lcon(%!/object),
+            objeval(%!, name(##)),,~
+          ),~
+        )
+      )|
+      key(exits,
+        jarray(
+          iter(
+            lexits(%!),
+            objeval(%!, name(##)),,~
+          ),~
+        )
       ),|
-    )
+    ))
   )]
+
+  
 
 @exitformat #rp = [if(not(hastotem(%#, json)), u(#gfo/header))]
 
@@ -122,6 +143,15 @@
     cname(%0),
     objeval(%!, singletime(idle(%0))),
     objeval(%!, default(%0/caption, The citizen.))
+  )
+
+
+&fn.json.player #rp = 
+  json(
+    key(name, name(%0))|
+    key(title, default(%0/caption, the commoner))|
+    key(prefix, get(%0/titlecaption))|
+    key(image, get(%0/image)),|
   )
 
 &fn.things #rp = 
