@@ -11,6 +11,7 @@
 &m_say #41=
   trim(if( 
     not(%4),
+    [setq(0, edit(%0, ", &quot;))]
     [iter(
       lcon(loc(%#),connect),
       ifelse(
@@ -19,8 +20,8 @@
           jencode(
             json(
               key(cmd, say)|
-              key(token, securestring())|
-              key(text, esclist(\(\)\[\]\{\}|%1))|
+              key(token, securestring(##))|
+              key(text, [lit(%q0)])|
               key(enactor, %#)|
               key(name, cname(%#))|
               key(image, get(%#/image))|

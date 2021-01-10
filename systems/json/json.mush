@@ -74,7 +74,7 @@
 */
 
 
-&ufun.json #json = &lbr;[iter(%0, ##, if(words(%1),%1,%b), %^)]&rbr;
+&ufun.json #json = &lbr;[iter(%0, ##, if(words(%1),%1,%b), `)]&rbr;
 
 
 /*
@@ -91,8 +91,17 @@
 
 
 &ufun.jencode #json =
-  iter(regeditalllit( %0, &lbr;, %{, &rbr;, %}, &lb;, %[, &rb;, %]),##,^,%,)
-
+      [setq(0,edit(%0, {")}, {)"}))]
+      [iter(
+        regeditalllit(
+          %q0, 
+          &lbr;, %{,
+          &rbr;, %},
+          &rb;, %],
+          &lb;, %[
+        ), ## ,`, %,
+      )] 
+          
 
 /*
 -----------------------------------------------------------------------------
@@ -100,7 +109,7 @@
 
   SYNTAX: key(key, value)
 
-  used to format basic key/value pairs.  Doesn't handle
+  used )to format basic key/value pairs.  Doesn't handle
 
 -----------------------------------------------------------------------------
 */
@@ -126,7 +135,7 @@
     strmatch(lcstr(%q0), true), true,
     strmatch(lcstr(%q0), false), false,
     strmatch(lcstr(%q0), &lb;*&rb;), %q0,
-    regedit(%q0, (.*), "$1")
+    "%q0"
   )]
 
 /*
@@ -145,7 +154,7 @@
   [iter(
     %0,
     u(#json/fn_valuetype,##),
-    if(words(%1),%1,%b), ^
+    if(words(%1),%1,%b), `
   )]&rb;
 
 
@@ -176,7 +185,7 @@
   @totem %#=json;
   &_securestring %#=%0;
   &securestring %#=%0;
-  @pemit %# = jencode(json(key(token, securestring(%#))));
+  @pemit %# = jencode(json(key(cmd, token) |key(token, %0),|));
   @tr %!/hook_json = %#, %0;
 
 @tr #json/startup;

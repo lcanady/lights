@@ -33,7 +33,7 @@
       ),
       jencode(
         json(
-          key(token, securestring())|
+          key(token, securestring(%#))|
           key(cmd, desc)|
           key(name, name(%!))|
           key(image, get(%!/image))|
