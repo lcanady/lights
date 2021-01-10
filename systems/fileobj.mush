@@ -1,5 +1,5 @@
 
-&fakecommands #fl = json|showlogin
+&fakecommands #fl = json|showlogin|jlogin
 
 /*
 =============================================================================

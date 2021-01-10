@@ -118,14 +118,15 @@
 */
 
 &fn_valuetype #json =
+  [setq(0, esclist(\(\)\[\]\{\}|%0))]
   [switch(1,
-    isnum(%0), %0,
-    strmatch(lcstr(%0), &lbr;*&rbr;), %0,
-    strmatch(lcstr(%0), null), null,
-    strmatch(lcstr(%0), true), true,
-    strmatch(lcstr(%0), false), false,
-    strmatch(lcstr(%0), &lb;*&rb;), %0,
-    "%0"
+    isnum(%q0), %q0,
+    strmatch(lcstr(%q0), &lbr;*&rbr;), %q0,
+    strmatch(lcstr(%q0), null), null,
+    strmatch(lcstr(%q0), true), true,
+    strmatch(lcstr(%q0), false), false,
+    strmatch(lcstr(%q0), &lb;*&rb;), %q0,
+    regedit(%q0, (.*), "$1")
   )]
 
 /*

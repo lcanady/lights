@@ -16,15 +16,17 @@
       ifelse(
         and(not(%4), hastotem(##,json)),
         pemit(##,
-          json(
-            key(cmd, say)|
-            key(token, securestring())|
-            key(text, edit(lit(%0), ", &quot;))|
-            key(enactor, %#)|
-            key(name, cname(%#))|
-            key(image, get(%#/image))|
-            key(caption, get(%#/caption))|
-            key(title, get(%#/titlecaption)), |
+          jencode(
+            json(
+              key(cmd, say)|
+              key(token, securestring())|
+              key(text, esclist(\(\)\[\]\{\}|%1))|
+              key(enactor, %#)|
+              key(name, cname(%#))|
+              key(image, get(%#/image))|
+              key(caption, get(%#/caption))|
+              key(title, get(%#/titlecaption)), |
+            )
           )
         ),
         pemit(##,%0)
