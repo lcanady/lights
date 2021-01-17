@@ -98,7 +98,8 @@
           &lbr;, %{,
           &rbr;, %},
           &rb;, %],
-          &lb;, %[
+          &lb;, %[,
+          &#44;, %,,
         ), ## ,`, %,
       )] 
           
@@ -109,7 +110,8 @@
 
   SYNTAX: key(key, value)
 
-  used )to format basic key/value pairs.  Doesn't handle
+ Used to handle assigning key/value JSON entries from MUSH data.  To assign
+ an array, look at jarray()
 
 -----------------------------------------------------------------------------
 */
@@ -127,7 +129,7 @@
 */
 
 &fn_valuetype #json =
-  [setq(0, esclist(\(\)\[\]\{\}|%0))]
+  [setq(0, esclist(\(\)\[\]\{\}\,|[edit(%0, %,, &#44;)]))]
   [switch(1,
     isnum(%q0), %q0,
     strmatch(lcstr(%q0), &lbr;*&rbr;), %q0,
@@ -181,11 +183,12 @@
 =============================================================================
 */
 
-&cmd.@json #json = $@json *:
+&cmd.@token #json = $@token *:
   @totem %#=json;
   &_securestring %#=%0;
-  &securestring %#=%0;
   @pemit %# = jencode(json(key(cmd, token) |key(token, %0),|));
-  @tr %!/hook_json = %#, %0;
+  @fo %#=look;
 
+
+@adisconnect #json = @totem %# = !json
 @tr #json/startup;

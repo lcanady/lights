@@ -1,3 +1,37 @@
 /*
-=============================================================================
-===
+#############################################################################
+### API Object ##############################################################
+
+  This is the code for the website, HTTP API object. It contains the code
+  needed to interact with the website from the game.
+
+  You'll need to make sure that you go through the steps of setting up
+  you object to make sure that:
+
+  1. You have the WebSocket port enabled.
+  2. You've set your @api/password for the Web API Object 
+
+#############################################################################
+*/
+
+// Create the API object if the tag doesn't already exist.tag
+@if not(isdbref(totem(#api))) = {
+    @create Globals: Web API Object <API>;
+    @tag/add api = lastcreate(me, t);
+    @set #api = safe inherit sidefx;
+    @power/arc = execscript;
+  }
+
+/*
+
+*/
+&cmd.check #api =$check *:
+  @assert checkpass(first(%0), last(%0)) = {
+    jencode(
+      
+    )
+
+  }
+  
+
+

@@ -107,7 +107,7 @@
         jarray(
           iter(
             lcon(%!/connect),
-            name(##),,~
+            u(#rp/fn.json.player,##),,~
           ),~
         )
       )|
@@ -142,16 +142,17 @@
     u(#gfo/fn.marker,%0),
     cname(%0),
     objeval(%!, singletime(idle(%0))),
-    objeval(%!, default(%0/caption, The citizen.))
+    objeval(%!, get(%0/caption))
   )
 
 
 &fn.json.player #rp = 
   json(
-    key(name, name(%0))|
-    key(title, default(%0/caption, the commoner))|
-    key(prefix, get(%0/titlecaption))|
-    key(image, get(%0/image)),|
+    key(name, name(%0))`
+    key(title, get(%0/caption))`
+    key(prefix, get(%0/titlecaption))`
+    key(image, get(%0/image))`
+    key(idle, singletime(idle(%0))),`
   )
 
 &fn.things #rp = 

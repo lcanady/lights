@@ -11,7 +11,7 @@
 &m_say #41=
   trim(if( 
     not(%4),
-    [setq(0, edit(%0, ", &quot;))]
+    [setq(0, u(#41/fn.format, %0))]
     [iter(
       lcon(loc(%#),connect),
       ifelse(
@@ -34,4 +34,62 @@
       )
     )]
   ))
-  
+
+&m_pose #41=
+  trim(if( 
+    not(%4),
+    [setq(0, u(#41/fn.format, %0))]
+    [iter(
+      lcon(loc(%#),connect),
+      ifelse(
+        and(not(%4), hastotem(##,json)),
+        pemit(##,
+          jencode(
+            json(
+              key(cmd, say)|
+              key(token, securestring(##))|
+              key(text, [lit(%q0)])|
+              key(enactor, %#)|
+              key(name, cname(%#))|
+              key(image, get(%#/image))|
+              key(caption, get(%#/caption))|
+              key(title, get(%#/titlecaption)), |
+            )
+          )
+        ),
+        pemit(##,%0)
+      )
+    )]
+  ))
+
+&m_@emit #41=
+  trim(if( 
+    not(%4),
+    [setq(0, u(#41/fn.format, %0))]
+    [iter(
+      lcon(loc(%#),connect),
+      ifelse(
+        and(not(%4), hastotem(##,json)),
+        pemit(##,
+          jencode(
+            json(
+              key(cmd, say)|
+              key(token, securestring(##))|
+              key(text, [lit(%q0)])|
+              key(enactor, %#)|
+              key(name, cname(%#))|
+              key(image, get(%#/image))|
+              key(caption, get(%#/caption))|
+              key(title, get(%#/titlecaption)), |
+            )
+          )
+        ),
+        pemit(##,%0)
+      )
+    )]
+  ))
+
+&fn.format #41 = 
+ [edit(edit(edit(%0,%t,&nbsp;&nbsp;&nbsp;&nbsp;), ", &quot;), %,, &#44;)]
+
+
